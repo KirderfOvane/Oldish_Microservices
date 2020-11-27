@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tickets-depl
+  name: products-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tickets
+      app: products
   template:
     metadata:
       labels:
-        app: tickets
+        app: products
     spec:
       containers:
-        - name: tickets
-          image: us.gcr.io/ticketing-dev-295419/tickets
+        - name: products
+          image: us.gcr.io/ticketing-dev-295419/products
           env:
             - name: NATS_CLIENT_ID
               valueFrom:
@@ -25,7 +25,7 @@ spec:
             - name: NATS_CLUSTER_ID
               value: ticketing
             - name: MONGO_URI
-              value: 'mongodb://tickets-mongo-srv:27017/tickets'
+              value: 'mongodb://products-mongo-srv:27017/products'
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
@@ -35,12 +35,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tickets-srv
+  name: products-srv
 spec:
   selector:
-    app: tickets
+    app: products
   ports:
-    - name: tickets
+    - name: products
       protocol: TCP
       port: 3000
       targetPort: 3000

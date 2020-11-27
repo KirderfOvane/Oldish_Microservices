@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
-interface TicketAttrs {
+interface ProductAttrs {
   title: string;
   price: number;
   userId: string;
 }
 
-interface TicketDoc extends mongoose.Document {
+interface ProductDoc extends mongoose.Document {
   title: string;
   price: number;
   userId: string;
@@ -15,11 +15,11 @@ interface TicketDoc extends mongoose.Document {
   orderId?: string;
 }
 
-interface TicketModel extends mongoose.Model<TicketDoc> {
-  build(attrs: TicketAttrs): TicketDoc;
+interface ProductModel extends mongoose.Model<ProductDoc> {
+  build(attrs: ProductAttrs): ProductDoc;
 }
 
-const ticketSchema = new mongoose.Schema(
+const productSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -46,13 +46,16 @@ const ticketSchema = new mongoose.Schema(
     },
   }
 );
-ticketSchema.set('versionKey', 'version');
-ticketSchema.plugin(updateIfCurrentPlugin);
+productSchema.set('versionKey', 'version');
+productSchema.plugin(updateIfCurrentPlugin);
 
-ticketSchema.statics.build = (attrs: TicketAttrs) => {
-  return new Ticket(attrs);
+productSchema.statics.build = (attrs: ProductAttrs) => {
+  return new Product(attrs);
 };
 
-const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchema);
+const Product = mongoose.model<ProductDoc, ProductModel>(
+  'Product',
+  productSchema
+);
 
-export { Ticket };
+export { Product };

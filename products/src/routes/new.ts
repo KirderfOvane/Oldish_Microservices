@@ -1,17 +1,17 @@
 import express, { Request, Response } from 'express';
-import { Ticket } from '../models/tickets';
+import { Product } from '../models/products';
 import {
   requireAuth,
   validateRequest,
 } from '@kirderfovane_sharedlibrary/oldish_common';
 import { body } from 'express-validator';
-import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
+import { ProductCreatedPublisher } from '../events/publishers/product-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
 router.post(
-  '/api/tickets',
+  '/api/products',
   requireAuth,
   [
     body('title').not().isEmpty().withMessage('Title is required'),
@@ -23,22 +23,22 @@ router.post(
   async (req: Request, res: Response) => {
     const { title, price } = req.body;
 
-    const ticket = Ticket.build({
+    const product = Product.build({
       title,
       price,
       userId: req.currentUser!.id,
     });
 
-    await ticket.save();
-    new TicketCreatedPublisher(natsWrapper.client).publish({
-      id: ticket.id,
-      title: ticket.title,
-      price: ticket.price,
-      userId: ticket.userId,
-      version: ticket.version,
+    await product.save();
+    new ProductCreatedPublisher(natsWrapper.client).publish({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      userId: product.userId,
+      version: product.version,
     });
-    res.status(201).send(ticket);
+    res.status(201).send(product);
   }
 );
 
-export { router as createTicketRouter };
+export { router as createProductRouter };

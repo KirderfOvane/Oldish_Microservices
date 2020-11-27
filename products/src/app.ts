@@ -7,10 +7,10 @@ import {
   currentUser,
 } from '@kirderfovane_sharedlibrary/oldish_common';
 import cookieSession from 'cookie-session';
-import { createTicketRouter } from './routes/new';
-import { showTicketRouter } from './routes/show';
-import { indexTicketRouter } from './routes/index';
-import { updateTicketRouter } from './routes/update';
+import { createProductRouter } from './routes/new';
+import { showProductRouter } from './routes/show';
+import { indexProductRouter } from './routes/index';
+import { updateProductRouter } from './routes/update';
 
 const app = express();
 app.set('trust proxy', true);
@@ -23,10 +23,10 @@ app.use(
 );
 app.use(currentUser);
 
-app.use(createTicketRouter);
-app.use(showTicketRouter);
-app.use(indexTicketRouter);
-app.use(updateTicketRouter);
+app.use(createProductRouter);
+app.use(showProductRouter);
+app.use(indexProductRouter);
+app.use(updateProductRouter);
 
 app.all('*', async (req, res, next) => {
   throw new NotFoundError();
