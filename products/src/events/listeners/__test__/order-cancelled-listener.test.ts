@@ -1,7 +1,7 @@
 import { OrderCancelledListener } from '../order-cancelled-listener';
 import { Message } from 'node-nats-streaming';
 import { natsWrapper } from '../../../nats-wrapper';
-import { Ticket } from '../../../models/tickets';
+import { Product } from '../../../models/products';
 import mongoose from 'mongoose';
 import { OrderCancelledEvent } from '@kirderfovane_sharedlibrary/oldish_common';
 
@@ -9,19 +9,19 @@ const setup = async () => {
   const listener = new OrderCancelledListener(natsWrapper.client);
 
   const orderId = mongoose.Types.ObjectId().toHexString();
-  const ticket = Ticket.build({
+  const product = Product.build({
     title: 'concert',
     price: 20,
     userId: 'asdf',
   });
-  ticket.set({ orderId });
-  await ticket.save();
+  product.set({ orderId });
+  await product.save();
 
   const data: OrderCancelledEvent['data'] = {
     id: orderId,
     version: 0,
-    ticket: {
-      id: ticket.id,
+    product: {
+      id: product.id,
     },
   };
 
@@ -30,16 +30,16 @@ const setup = async () => {
     ack: jest.fn(),
   };
 
-  return { msg, data, ticket, orderId, listener };
+  return { msg, data, product, orderId, listener };
 };
 
-it('updates the ticket , publishes and event and acks the message', async () => {
-  const { msg, data, ticket, orderId, listener } = await setup();
+it('updates the product , publishes and event and acks the message', async () => {
+  const { msg, data, product, orderId, listener } = await setup();
 
   await listener.onMessage(data, msg);
 
-  const updatedTicket = await Ticket.findById(ticket.id);
-  expect(updatedTicket!.orderId).not.toBeDefined();
+  const updatedproduct = await Product.findById(product.id);
+  expect(updatedproduct!.orderId).not.toBeDefined();
   expect(msg.ack).toHaveBeenCalled();
   expect(natsWrapper.client.publish).toHaveBeenCalled();
 });

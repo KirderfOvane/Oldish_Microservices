@@ -2,30 +2,30 @@ import request from 'supertest';
 import { app } from '../../app';
 import mongoose from 'mongoose';
 import { Order, OrderStatus } from '../../models/order';
-import { Ticket } from '../../models/ticket';
+import { Product } from '../../models/product';
 import { natsWrapper } from '../../nats-wrapper';
 
-it('returns an error if the ticket does not exist', async () => {
-  const ticketId = mongoose.Types.ObjectId();
+it('returns an error if the product does not exist', async () => {
+  const productId = mongoose.Types.ObjectId();
 
   await request(app)
     .post('/api/orders')
     .set('Cookie', global.signin())
     .send({
-      ticketId,
+      productId,
     })
     .expect(404);
 });
 
-it('returns an error if the ticket is already reserved', async () => {
-  const ticket = Ticket.build({
+it('returns an error if the product is already reserved', async () => {
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
   const order = Order.build({
-    ticket,
+    product,
     userId: 'sadskfkdsg',
     status: OrderStatus.Created,
     expiresAt: new Date(),
@@ -35,36 +35,36 @@ it('returns an error if the ticket is already reserved', async () => {
   await request(app)
     .post('/api/orders')
     .set('Cookie', global.signin())
-    .send({ ticketId: ticket.id })
+    .send({ productId: product.id })
     .expect(400);
 });
-it('reserves a ticket', async () => {
-  const ticket = Ticket.build({
+it('reserves a product', async () => {
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
 
   await request(app)
     .post('/api/orders')
     .set('Cookie', global.signin())
-    .send({ ticketId: ticket.id })
+    .send({ productId: product.id })
     .expect(201);
 });
 
 it('emits an order created event', async () => {
-  const ticket = Ticket.build({
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
 
   await request(app)
     .post('/api/orders')
     .set('Cookie', global.signin())
-    .send({ ticketId: ticket.id })
+    .send({ productId: product.id })
     .expect(201);
 
   expect(natsWrapper.client.publish).toHaveBeenCalled();

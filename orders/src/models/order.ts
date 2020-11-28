@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { OrderStatus } from '@kirderfovane_sharedlibrary/oldish_common';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
-import { TicketDoc } from './ticket';
+import { ProductDoc } from './product';
 
 export { OrderStatus };
 
@@ -9,14 +9,14 @@ interface OrderAttrs {
   userId: string;
   status: OrderStatus;
   expiresAt: Date;
-  ticket: TicketDoc;
+  product: ProductDoc;
 }
 
 interface OrderDoc extends mongoose.Document {
   userId: string;
   status: OrderStatus;
   expiresAt: Date;
-  ticket: TicketDoc;
+  product: ProductDoc;
   version: number;
 }
 
@@ -39,9 +39,9 @@ const orderSchema = new mongoose.Schema(
     expiresAt: {
       type: mongoose.Schema.Types.Date,
     },
-    ticket: {
+    product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Ticket',
+      ref: 'Product',
     },
   },
   {

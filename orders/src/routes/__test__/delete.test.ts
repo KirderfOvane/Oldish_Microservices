@@ -1,7 +1,7 @@
 import { app } from '../../app';
 import mongoose from 'mongoose';
 import request from 'supertest';
-import { Ticket } from '../../models/ticket';
+import { Product } from '../../models/product';
 import { Order, OrderStatus } from '../../models/order';
 import { natsWrapper } from '../../nats-wrapper';
 
@@ -9,20 +9,20 @@ import { natsWrapper } from '../../nats-wrapper';
 //it('throws error if not found',async () => {})
 //it('throws error if another user tries to delete',async () => {})
 it('set the order status to cancelled and sends a 204 to user', async () => {
-  // create a ticket with ticket model
-  const ticket = Ticket.build({
+  // create a product with product model
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'title',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
   const user = global.signin();
 
   // make a req to create an order
   const { body: order } = await request(app)
     .post('/api/orders')
     .set('Cookie', user)
-    .send({ ticketId: ticket.id })
+    .send({ productId: product.id })
     .expect(201);
   //make a req to cancel the order
   await request(app)
@@ -36,19 +36,19 @@ it('set the order status to cancelled and sends a 204 to user', async () => {
 });
 
 it('emits an order cancelled event', async () => {
-  const ticket = Ticket.build({
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'title',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
   const user = global.signin();
 
   // make a req to create an order
   const { body: order } = await request(app)
     .post('/api/orders')
     .set('Cookie', user)
-    .send({ ticketId: ticket.id })
+    .send({ productId: product.id })
     .expect(201);
   //make a req to cancel the order
   await request(app)

@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@kirderfovane_sharedlibrary/oldish_common": "^1.0.0",
+    "@kirderfovane_sharedlibrary/oldish_common": "^1.0.3",
     "@types/bull": "^3.14.4",
     "bull": "^3.19.1",
     "node-nats-streaming": "^0.2.6",

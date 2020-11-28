@@ -2,28 +2,28 @@ import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { Order, OrderStatus } from './order';
 
-interface TicketAttrs {
+interface ProductAttrs {
   id: string;
   title: string;
   price: number;
 }
 
-export interface TicketDoc extends mongoose.Document {
+export interface ProductDoc extends mongoose.Document {
   title: string;
   price: number;
   version: number;
   isReserved(): Promise<boolean>;
 }
 
-interface TicketModel extends mongoose.Model<TicketDoc> {
-  build(attrs: TicketAttrs): TicketDoc;
+interface ProductModel extends mongoose.Model<ProductDoc> {
+  build(attrs: ProductAttrs): ProductDoc;
   findByEvent(event: {
     id: string;
     version: number;
-  }): Promise<TicketDoc | null>;
+  }): Promise<ProductDoc | null>;
 }
 
-const ticketSchema = new mongoose.Schema(
+const productSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -45,28 +45,31 @@ const ticketSchema = new mongoose.Schema(
   }
 );
 
-ticketSchema.set('versionKey', 'version');
-ticketSchema.plugin(updateIfCurrentPlugin);
+productSchema.set('versionKey', 'version');
+productSchema.plugin(updateIfCurrentPlugin);
 
-ticketSchema.statics.findByEvent = (event: { id: string; version: number }) => {
-  return Ticket.findOne({
+productSchema.statics.findByEvent = (event: {
+  id: string;
+  version: number;
+}) => {
+  return Product.findOne({
     _id: event.id,
     version: event.version - 1,
   });
 };
-ticketSchema.statics.build = (attrs: TicketAttrs) => {
-  return new Ticket({
+productSchema.statics.build = (attrs: ProductAttrs) => {
+  return new Product({
     _id: attrs.id,
     title: attrs.title,
     price: attrs.price,
   });
 };
 
-// running query to look at all orders and find ticket and look at status of order
+// running query to look at all orders and find product and look at status of order
 // and make sure its not cancelled
-ticketSchema.methods.isReserved = async function () {
+productSchema.methods.isReserved = async function () {
   const existingOrder = await Order.findOne({
-    ticket: this,
+    product: this,
     status: {
       $in: [
         OrderStatus.Created,
@@ -78,6 +81,9 @@ ticketSchema.methods.isReserved = async function () {
   return !!existingOrder;
 };
 
-const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchema);
+const Product = mongoose.model<ProductDoc, ProductModel>(
+  'Product',
+  productSchema
+);
 
-export { Ticket };
+export { Product };

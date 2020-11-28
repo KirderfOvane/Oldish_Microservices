@@ -8,7 +8,7 @@ import {
   BadRequestError,
 } from '@kirderfovane_sharedlibrary/oldish_common';
 import { body } from 'express-validator';
-import { Ticket } from '../models/ticket';
+import { Product } from '../models/product';
 import { Order } from '../models/order';
 import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
@@ -21,27 +21,27 @@ router.post(
   '/api/orders',
   requireAuth,
   [
-    body('ticketId')
+    body('productId')
       .not()
       .isEmpty()
       .custom((input: string) => mongoose.Types.ObjectId.isValid(input))
-      .withMessage('TicketId must be provided'),
+      .withMessage('ProductId must be provided'),
   ],
   validateRequest,
   async (req: Request, res: Response) => {
-    const { ticketId } = req.body;
+    const { productId } = req.body;
 
-    // Find the ticket the user is trying to order in database
-    const ticket = await Ticket.findById(ticketId);
-    if (!ticket) {
+    // Find the product the user is trying to order in database
+    const product = await Product.findById(productId);
+    if (!product) {
       throw new NotFoundError();
     }
 
-    // Make sure that this ticket is not already reserved by
+    // Make sure that this product is not already reserved by
 
-    const isReserved = await ticket.isReserved();
+    const isReserved = await product.isReserved();
     if (isReserved) {
-      throw new BadRequestError('Ticket is already reserved');
+      throw new BadRequestError('Product is already reserved');
     }
 
     // Calculate an expiration date for this order
@@ -53,7 +53,7 @@ router.post(
       userId: req.currentUser!.id,
       status: OrderStatus.Created,
       expiresAt: expiration,
-      ticket,
+      product,
     });
     await order.save();
 
@@ -64,9 +64,9 @@ router.post(
       status: order.status,
       userId: order.userId,
       expiresAt: order.expiresAt.toISOString(),
-      ticket: {
-        id: ticket.id,
-        price: ticket.price,
+      product: {
+        id: product.id,
+        price: product.price,
       },
     });
     res.status(201).send(order);

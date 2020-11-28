@@ -1,13 +1,13 @@
 import { Product } from '../products';
 
 it('implements optimisitc concurrency control', async (done) => {
-  // Create an instance of a ticket
+  // Create an instance of a product
   const product = Product.build({
     title: 'concert',
     price: 5,
     userId: '123',
   });
-  // Save the ticket to the database
+  // Save the product to the database
   await product.save();
   // fetch the product twice
   const firstInstance = await Product.findById(product.id);

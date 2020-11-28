@@ -1,7 +1,7 @@
 import { ExpirationCompleteListener } from '../expiration-complete-listener';
 import { natsWrapper } from '../../../nats-wrapper';
 import { Order } from '../../../models/order';
-import { Ticket } from '../../../models/ticket';
+import { Product } from '../../../models/product';
 import mongoose from 'mongoose';
 import {
   OrderStatus,
@@ -12,18 +12,18 @@ import { Message } from 'node-nats-streaming';
 const setup = async () => {
   const listener = new ExpirationCompleteListener(natsWrapper.client);
 
-  const ticket = Ticket.build({
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
 
   const order = Order.build({
     status: OrderStatus.Created,
     userId: 'asdasdasd',
     expiresAt: new Date(),
-    ticket,
+    product,
   });
   await order.save();
 
@@ -36,11 +36,11 @@ const setup = async () => {
     ack: jest.fn(),
   };
 
-  return { listener, order, ticket, data, msg };
+  return { listener, order, product, data, msg };
 };
 
 it('updates the order status to cancelled', async () => {
-  const { listener, order, ticket, data, msg } = await setup();
+  const { listener, order, product, data, msg } = await setup();
 
   await listener.onMessage(data, msg);
 
@@ -49,7 +49,7 @@ it('updates the order status to cancelled', async () => {
   expect(updatedOrder!.status).toEqual(OrderStatus.Cancelled);
 });
 it('emit an order cancelled event', async () => {
-  const { listener, order, ticket, data, msg } = await setup();
+  const { listener, order, product, data, msg } = await setup();
   await listener.onMessage(data, msg);
 
   expect(natsWrapper.client.publish).toHaveBeenCalled();
@@ -60,7 +60,7 @@ it('emit an order cancelled event', async () => {
   expect(eventData.id).toEqual(order.id);
 });
 it('acks the message', async () => {
-  const { listener, order, ticket, data, msg } = await setup();
+  const { listener, order, product, data, msg } = await setup();
 
   await listener.onMessage(data, msg);
 

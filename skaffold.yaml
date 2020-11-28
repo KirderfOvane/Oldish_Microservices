@@ -19,8 +19,8 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: us.gcr.io/ticketing-dev-295419/tickets
-      context: tickets
+    - image: us.gcr.io/ticketing-dev-295419/products
+      context: products
       docker:
         dockerfile: Dockerfile
       sync:

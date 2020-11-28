@@ -5,31 +5,31 @@ import {
 } from '@kirderfovane_sharedlibrary/oldish_common';
 import { Message } from 'node-nats-streaming';
 import { queueGroupName } from './queue-group-name';
-import { Ticket } from '../../models/tickets';
-import { TicketUpdatedPublisher } from '../publishers/ticket-updated-publisher';
+import { Product } from '../../models/products';
+import { ProductUpdatedPublisher } from '../publishers/product-updated-publisher';
 
 export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
   readonly subject = Subjects.OrderCreated;
   queueGroupName = queueGroupName;
   async onMessage(data: OrderCreatedEvent['data'], msg: Message) {
-    // Find the ticket that the order is reserving
-    const ticket = await Ticket.findById(data.ticket.id);
-    // If no ticket, throw error
-    if (!ticket) {
-      throw new Error('Ticket not found');
+    // Find the product that the order is reserving
+    const product = await Product.findById(data.product.id);
+    // If no product, throw error
+    if (!product) {
+      throw new Error('product not found');
     }
 
-    // Mark the ticket as being reserved by setting its orderId property
-    ticket.set({ orderId: data.id });
-    // Save the ticket
-    await ticket.save();
-    await new TicketUpdatedPublisher(this.client).publish({
-      id: ticket.id,
-      price: ticket.price,
-      title: ticket.title,
-      userId: ticket.userId,
-      orderId: ticket.orderId,
-      version: ticket.version,
+    // Mark the product as being reserved by setting its orderId property
+    product.set({ orderId: data.id });
+    // Save the product
+    await product.save();
+    await new ProductUpdatedPublisher(this.client).publish({
+      id: product.id,
+      price: product.price,
+      title: product.title,
+      userId: product.userId,
+      orderId: product.orderId,
+      version: product.version,
     });
 
     // ack the message

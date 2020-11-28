@@ -72,12 +72,12 @@ it('updates the product and provides valid input', async () => {
     .send({ title: 'valid', price: 20 })
     .expect(200);
 
-  const ticketResponse = await request(app)
+  const productResponse = await request(app)
     .get(`/api/products/${response.body.id}`)
     .send();
 
-  expect(ticketResponse.body.title).toEqual('valid');
-  expect(ticketResponse.body.price).toEqual(20);
+  expect(productResponse.body.title).toEqual('valid');
+  expect(productResponse.body.price).toEqual(20);
 });
 
 it('publishes an event', async () => {

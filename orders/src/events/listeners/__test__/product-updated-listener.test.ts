@@ -1,24 +1,24 @@
-import { TicketUpdatedListener } from '../ticket-updated-listener';
+import { ProductUpdatedListener } from '../product-updated-listener';
 import { Message } from 'node-nats-streaming';
 import { natsWrapper } from '../../../nats-wrapper';
-import { Ticket } from '../../../models/ticket';
+import { Product } from '../../../models/product';
 import mongoose from 'mongoose';
-import { TicketUpdatedEvent } from '@kirderfovane_sharedlibrary/oldish_common';
+import { ProductUpdatedEvent } from '@kirderfovane_sharedlibrary/oldish_common';
 
 const setup = async () => {
   // Create a listener
-  const listener = new TicketUpdatedListener(natsWrapper.client);
-  // Create and save a ticket
-  const ticket = Ticket.build({
+  const listener = new ProductUpdatedListener(natsWrapper.client);
+  // Create and save a product
+  const product = Product.build({
     id: mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
     price: 20,
   });
-  await ticket.save();
+  await product.save();
   // Create a fake data object
-  const data: TicketUpdatedEvent['data'] = {
-    id: ticket.id,
-    version: ticket.version + 1,
+  const data: ProductUpdatedEvent['data'] = {
+    id: product.id,
+    version: product.version + 1,
     title: 'test',
     price: 40,
     userId: 'abc',
@@ -29,19 +29,19 @@ const setup = async () => {
     ack: jest.fn(),
   };
   // return all of this stuff
-  return { msg, data, ticket, listener };
+  return { msg, data, product, listener };
 };
 
-it('fins,updates and saves a ticket', async () => {
-  const { msg, data, ticket, listener } = await setup();
+it('fins,updates and saves a product', async () => {
+  const { msg, data, product, listener } = await setup();
 
   await listener.onMessage(data, msg);
 
-  const updatedTicket = await Ticket.findById(ticket.id);
+  const updatedProduct = await Product.findById(product.id);
 
-  expect(updatedTicket!.title).toEqual(data.title);
-  expect(updatedTicket!.price).toEqual(data.price);
-  expect(updatedTicket!.version).toEqual(data.version);
+  expect(updatedProduct!.title).toEqual(data.title);
+  expect(updatedProduct!.price).toEqual(data.price);
+  expect(updatedProduct!.version).toEqual(data.version);
 });
 it('acks the message', async () => {
   const { msg, data, listener } = await setup();
@@ -52,7 +52,7 @@ it('acks the message', async () => {
 });
 
 it('tests Optimistic Concurrency Control, does not call ack if the event version is too high', async () => {
-  const { msg, data, listener, ticket } = await setup();
+  const { msg, data, listener, product } = await setup();
 
   data.version = 10;
   try {
